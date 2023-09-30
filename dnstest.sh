@@ -2,7 +2,7 @@
 
 
 command -v bc > /dev/null || { echo "error: bc was not found. Please install bc."; exit 1; }
-{ command -v drill > /dev/null && dig=drill; } || { command -v dig > /dev/null && dig=dig; } || { echo "error: dig was not found. Please install dnsutils."; exit 1; }
+command -v dig > /dev/null || { echo "error: dig was not found. Please install dnsutils."; exit 1; }
 
 
 NAMESERVERS=`cat /etc/resolv.conf | grep ^nameserver | cut -d " " -f 2 | sed 's/\(.*\)/&#&/'`
@@ -84,11 +84,11 @@ for p in $NAMESERVERS $providerstotest; do
 
     printf "%-21s" "$pname"
     for d in $DOMAINS2TEST; do
-        ttime=`$dig +tries=1 +time=2 +stats @$pip $d |grep "Query time:" | cut -d : -f 2- | cut -d " " -f 2`
+        ttime=`dig +tries=1 +time=2 +stats @$pip $d |grep "Query time:" | cut -d : -f 2- | cut -d " " -f 2`
         if [ -z "$ttime" ]; then
 	        #let's have time out be 1s = 1000ms
 	        ttime=1000
-        elif [ "x$ttime" = "x0" ]; then
+        elif [ "$ttime" -eq 0 ]; then
 	        ttime=1
 	    fi
 
